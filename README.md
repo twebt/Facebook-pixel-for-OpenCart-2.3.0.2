@@ -12,8 +12,7 @@ Integrate Facebook Pixel in your store to track the default events.
 * Purchase
 
 ## Requirements:
-* vQmod installed
-Here you can find appropriate relesea ![vQmod for OpenCart](https://github.com/vqmod/vqmod/releases)
+* ![vQmod for OpenCart](https://github.com/vqmod/vqmod/releases)
 
 ## Notes:
 The module is tested only on:
