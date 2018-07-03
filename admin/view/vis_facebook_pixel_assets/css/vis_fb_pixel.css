@@ -1,0 +1,14 @@
+/** 
+* vis_fb_pixel
+*/
+
+.bootstrap-switch {
+    border-radius: 38px;
+}
+.bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-primary, .bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-primary {
+    background: #4080ff;
+}
+.label-event {
+    margin-top: 8px;
+    margin-right: 8px;
+}

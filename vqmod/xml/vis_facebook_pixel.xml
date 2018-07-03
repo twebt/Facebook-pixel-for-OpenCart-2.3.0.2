@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <name>Facebook Pixel Marketing</name>
+    <code>vis_facebook_pixel</code>
+    <author>Tony Tanchevski</author>
+
+    <!-- Catalog header.php -->
+    <file path="catalog/controller/common/header.php">
+        <operation error="skip">
+            <search position="after"><![CDATA[$data['name'] = $this->config->get('config_name');]]></search>
+            <add>
+                <![CDATA[
+
+                /**
+                * module status, facebook pixel id, facebook events,
+                */
+                $data['vis_facebook_pixel_status'] = $this->config->get('vis_facebook_pixel_status');
+                $data['facebook_pixel_id'] 		  = $this->config->get('vis_facebook_pixel_pixel_id');
+                $data['facebook_pixel_events'] 	  = $this->config->get('vis_facebook_pixel_events');
+                ]]>
+            </add>
+        </operation>
+    </file>
+
+    <file path="catalog/view/theme/*/template/common/header.tpl">
+        <operation error="skip">
+            <search position="before"><![CDATA[</head>]]></search>
+            <add>
+                <![CDATA[
+                <?php if ($vis_facebook_pixel_status && array_key_exists('page-view', $facebook_pixel_events)) : ?>
+                <!-- Facebook Pixel Code -->
+                <script>
+                    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+                    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+                    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+                    document,'script','//connect.facebook.net/en_US/fbevents.js');
+
+                    fbq('init', '<?php echo $facebook_pixel_id; ?>');
+                    fbq('track', "PageView");
+                </script>
+                <!-- End Facebook Pixel Code -->
+                <?php endif; ?>
+                ]]>
+            </add>
+        </operation>
+    </file>
+
+    <!-- Catalog product.php -->
+    <file path="catalog/controller/product/product.php">
+        <operation error="skip">
+            <search position="iafter"><![CDATA[public function index() {]]></search>
+            <add>
+                <![CDATA[
+                /**
+                * module status, facebook pixel id, facebook events,
+                */
+                $data['vis_facebook_pixel_status'] = $this->config->get('vis_facebook_pixel_status');
+                $data['facebook_pixel_id'] 		  = $this->config->get('vis_facebook_pixel_pixel_id');
+                $data['facebook_pixel_events'] 	  = $this->config->get('vis_facebook_pixel_events');
+                ]]>
+            </add>
+        </operation>
+        <operation error="skip">
+            <search position="before"><![CDATA[$discounts = $this->model_catalog_product->getProductDiscounts($this->request->get['product_id']);]]></search>
+            <add>
+                <![CDATA[
+                if(!$data['special']){
+                $data['facebook_pixel_price'] = $this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax'));
+                } else {
+                $data['facebook_pixel_price'] = $this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax'));
+                }
+                $data['facebook_pixel_currency']  = $this->session->data['currency'];
+                $data['facebook_content_id'] 	= $this->request->get['product_id'];
+                ]]>
+            </add>
+        </operation>
+    </file>
+
+    <file path="catalog/view/theme/*/template/product/product.tpl">
+        <operation error="skip">
+            <search position="before"><![CDATA[<?php echo $footer; ?>]]></search>
+            <add>
+                <![CDATA[
+                <?php if ($vis_facebook_pixel_status && array_key_exists('view-content', $facebook_pixel_events)) : ?>
+                <!-- Facebook Pixel Code -->
+                <script>
+                    fbq('track', 'ViewContent', {
+                    content_ids: ['<?php echo $facebook_content_id ?>'],
+                    content_type: 'product',
+                    content_name: '<?php echo $heading_title; ?>',
+                    value: <?php echo $facebook_pixel_price; ?>,
+                    currency: '<?php echo $facebook_pixel_currency; ?>'
+                    });
+                </script>
+                <!-- End Facebook Pixel Code -->
+                <?php endif; ?>
+                ]]>
+            </add>
+        </operation>
+    </file>
+
+    <!-- Checkout Cart - AddToCart Event -->
+    <file path="catalog/controller/checkout/cart.php">
+        <operation error="skip">
+            <search position="before">
+                <![CDATA[$product_options = $this->model_catalog_product->getProductOptions($this->request->post['product_id']);]]>
+            </search>
+            <add>
+                <![CDATA[
+                if(!$product_info['special']){
+                $facebook_pixel_price = $this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax'));
+                } else {
+                $facebook_pixel_price = $this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax'));
+                }
+
+                $facebook_pixel_currency  = $this->session->data['currency'];
+
+                /**
+                * module status, facebook catalog id, facebook events,
+                */
+                $vis_facebook_pixel_status 	 = $this->config->get('vis_facebook_pixel_status');
+                $facebook_pixel_catalog_id  = $this->config->get('vis_facebook_pixel_catalog_id');
+                $facebook_pixel_events 	 = $this->config->get('vis_facebook_pixel_events');
+
+                $addToCart = "
+                <script>
+                    fbq('track', 'AddToCart', {
+                    content_name: '" . $product_info['name'] . "', 
+                    content_ids: ['" . $this->request->post['product_id'] . "'],
+                    content_type: 'product',
+                    value: " . $facebook_pixel_price . ",
+                    currency: '" . $facebook_pixel_currency . "'
+                    });
+                </script>";
+                ]]>
+            </add>
+        </operation>
+        <operation error="skip">
+            <search position="after">
+                <![CDATA[$json['success'] = sprintf($this->language->get('text_success'), $this->url->link('product/product', 'product_id=' . $this->request->post['product_id']), $product_info['name'], $this->url->link('checkout/cart'));]]>
+            </search>
+            <add>
+                <![CDATA[
+                if ($vis_facebook_pixel_status && array_key_exists('add-to-cart', $facebook_pixel_events)) $json['success'] .= $addToCart;
+                ]]>
+            </add>
+        </operation>
+    </file>
+
+    <!-- Initiate Checkout -->
+    <file path="catalog/controller/checkout/checkout.php">
+        <operation error="skip">
+            <search position="after">
+                <![CDATA[$products = $this->cart->getProducts();]]>
+            </search>
+            <add>
+                <![CDATA[
+                // producst ids in cart
+                $data['products_ids_cart'] = '';
+
+                // product count
+                $data['product_items'] = 0;
+
+                foreach ($products as $product) {
+                $data['products_ids_cart'] .= "'" . $product['product_id'] . "',";
+                $data['product_items'] += $product['quantity'];
+                }
+
+                // SubTotal
+                $data['sub_total'] = $this->cart->getSubTotal();
+
+                // remove last ',' from string
+                $data['products_ids_cart'] = '[' . rtrim($data['products_ids_cart'],",") . ']';
+
+                // currency
+                $data['facebook_pixel_currency']  = $this->session->data['currency'];
+
+                /**
+                * module status, facebook events,
+                */
+                $data['vis_facebook_pixel_status'] = $this->config->get('vis_facebook_pixel_status');
+                $data['facebook_pixel_events'] 	  = $this->config->get('vis_facebook_pixel_events');
+                ]]>
+            </add>
+        </operation>
+    </file>
+
+    <file path="catalog/view/theme/*/template/checkout/checkout.tpl">
+        <operation error="skip">
+            <search position="before">
+                <![CDATA[<?php echo $footer; ?>]]>
+            </search>
+            <add>
+                <![CDATA[
+                <?php if ($vis_facebook_pixel_status && array_key_exists('initiate-checkout', $facebook_pixel_events)) : ?>
+                <!-- Facebook Pixel Code -->
+                <script><!--
+                    fbq('track', 'InitiateCheckout', {content_ids: <?php echo $products_ids_cart ?>,num_items: <?php echo $product_items ?>,content_type: 'product',value: <?php echo $sub_total ?>,currency: '<?php echo $facebook_pixel_currency; ?>'});	
+                    //--></script>
+                    <!-- End Facebook Pixel Code -->
+                    <?php endif; ?>
+                ]]>
+            </add>
+        </operation>
+    </file>
+
+    <!-- Pixel Event - Purchase -->
+    <file path="catalog/controller/checkout/success.php">
+        <operation error="skip">
+            <search position="after"><![CDATA[if (isset($this->session->data['order_id'])) {]]></search>
+            <add><![CDATA[
+                $this->load->model('checkout/order');
+                $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
+
+                $product_ids = array();
+                $product_items = 0;
+
+                foreach ($this->cart->getProducts() as $product) {
+                $product_ids[] = $product['product_id'];
+                $product_items += $product['quantity'];
+                }
+
+                $currency = $this->session->data['currency'];
+
+                $data['Purchase'] = "fbq('track', 'Purchase', {content_ids: [". implode(',', $product_ids) ."],content_type: 'product',value: ". $order_info['total'] .", num_items: $product_items, currency: '$currency'});";
+
+                ]]>
+            </add>
+        </operation>
+        <operation error="skip">
+            <search position="after"><![CDATA[$data['continue'] = $this->url->link('common/home');]]></search>
+            <add><![CDATA[
+                /**
+                * module status, facebook events,
+                */
+                $data['vis_facebook_pixel_status'] = $this->config->get('vis_facebook_pixel_status');
+                $data['facebook_pixel_events'] 	  = $this->config->get('vis_facebook_pixel_events');
+                ]]>
+            </add>
+        </operation>
+    </file>
+
+    <file path="catalog/view/theme/*/template/common/success.tpl">
+        <operation error="skip">
+            <search position="before">
+                <![CDATA[<?php echo $footer; ?>]]>
+            </search>
+            <add>
+            <![CDATA[
+
+            <?php if (isset($vis_facebook_pixel_status) && isset($Purchase) && array_key_exists('purchase', $facebook_pixel_events)) : ?>
+            <!-- Facebook Pixel Code -->
+            <script><!--
+                <?php echo $Purchase; ?>
+                //--></script>
+                <!-- End Facebook Pixel Code -->
+                <?php endif; ?>
+                ]]>
+            </add>
+        </operation>
+    </file>
+</modification>
