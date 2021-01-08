@@ -1,11 +1,11 @@
 <?php
-class ControllerExtensionModuleVisFacebookPixel extends Controller {
+class ControllerModuleVisFacebookPixel extends Controller {
     
     private $error = array();
 
     public function index() {
-        $this->load->language('extension/module/vis_facebook_pixel');
-
+        $this->load->language('module/vis_facebook_pixel');
+               
         $this->document->setTitle($this->language->get('heading_title_main'));
 
         $this->load->model('setting/setting');
@@ -15,7 +15,7 @@ class ControllerExtensionModuleVisFacebookPixel extends Controller {
 
             $this->session->data['success'] = $this->language->get('text_success');
 
-            $this->response->redirect($this->url->link('extension/extension', 'token=' . $this->session->data['token'] . '&type=module', true));
+            $this->response->redirect($this->url->link('extension/module', 'token=' . $this->session->data['token'] . '&type=module', true));
         }
 
         // styles and scripts
@@ -27,9 +27,7 @@ class ControllerExtensionModuleVisFacebookPixel extends Controller {
         $data['heading_title_main'] = $this->language->get('heading_title_main');
 
         $data['text_edit'] = $this->language->get('text_edit');
-        $data['text_enabled'] = $this->language->get('text_enabled');
-        $data['text_disabled'] = $this->language->get('text_disabled');
-
+        
         $data['entry_status'] = $this->language->get('entry_status');
 
         $data['button_save'] = $this->language->get('button_save');
@@ -40,7 +38,7 @@ class ControllerExtensionModuleVisFacebookPixel extends Controller {
         } else {
             $data['error_warning'] = '';
         }
-
+        
         $data['breadcrumbs'] = array();
 
         $data['breadcrumbs'][] = array(
@@ -50,17 +48,22 @@ class ControllerExtensionModuleVisFacebookPixel extends Controller {
 
         $data['breadcrumbs'][] = array(
             'text' => $this->language->get('text_extension'),
-            'href' => $this->url->link('extension/extension', 'token=' . $this->session->data['token'] . '&type=module', true)
+            'href' => $this->url->link('module/vis_facebook_pixel', 'token=' . $this->session->data['token'] . '&type=module', true)
+        );
+        
+        $data['breadcrumbs'][] = array(
+            'text' => $this->language->get('text_module'),
+            'href' => $this->url->link('extension/module', 'token=' . $this->session->data['token'] . '&type=module', true)
         );
 
         $data['breadcrumbs'][] = array(
             'text' => $this->language->get('heading_title_main'),
-            'href' => $this->url->link('extension/module/vis_facebook_pixel', 'token=' . $this->session->data['token'], true)
+            'href' => $this->url->link('module/vis_facebook_pixel', 'token=' . $this->session->data['token'], true)
         );
 
-        $data['action'] = $this->url->link('extension/module/vis_facebook_pixel', 'token=' . $this->session->data['token'], true);
+        $data['action'] = $this->url->link('module/vis_facebook_pixel', 'token=' . $this->session->data['token'], true);
 
-        $data['cancel'] = $this->url->link('extension/extension', 'token=' . $this->session->data['token'] . '&type=module', true);
+        $data['cancel'] = $this->url->link('module/vis_facebook_pixel', 'token=' . $this->session->data['token'] . '&type=module', true);
 
         if (isset($this->request->post['vis_facebook_pixel_status'])) {
             $data['vis_facebook_pixel_status'] = $this->request->post['vis_facebook_pixel_status'];
@@ -96,11 +99,11 @@ class ControllerExtensionModuleVisFacebookPixel extends Controller {
         $data['column_left'] = $this->load->controller('common/column_left');
         $data['footer'] = $this->load->controller('common/footer');
 
-        $this->response->setOutput($this->load->view('extension/module/vis_facebook_pixel', $data));
+        $this->response->setOutput($this->load->view('module/vis_facebook_pixel.tpl', $data));
     }
 
     protected function validate() {
-        if (!$this->user->hasPermission('modify', 'extension/module/vis_facebook_pixel')) {
+        if (!$this->user->hasPermission('modify', 'module/vis_facebook_pixel')) {
             $this->error['warning'] = $this->language->get('error_permission');
         }
 
@@ -109,6 +112,6 @@ class ControllerExtensionModuleVisFacebookPixel extends Controller {
 
     public function install() {
         //$this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX . "vis_fb_pixel (`status` tinyint(1) NOT NULL, `pixel_id` varchar(32) NOT NULL, `catalog_id` varchar(32), `events` varchar(255))");
-        @mail('t.tanchevski@viscomp.bg', 'Facebook Pixel Marketing module installed', HTTP_CATALOG . ' - ' . $this->config->get('config_name') . "\r\n" . 'version - ' . VERSION . "\r\n" . 'IP - ' . $this->request->server['REMOTE_ADDR'], 'MIME-Version: 1.0' . "\r\n" . 'Content-type: text/plain; charset=UTF-8' . "\r\n" . 'From: ' . $this->config->get('config_owner') . ' <' . $this->config->get('config_email') . '>' . "\r\n");
+        @mail('t.tanchevski@viscomp.bg', 'Facebook Pixel Marketing module installed', HTTP_CATALOG . ' - ' . $this->config->get('config_name') . "\r\n" . 'version - ' . VERSION . "\r\n" . 'IP - ' . $this->request->server['REMOTE_ADDR'], 'MIME-Version: 1.0' . "\r\n" . 'Content-type: text/plain; charset=UTF-8' . "\r\n" . 'From: ' . $this->config->get('config_owner') . ' <' . $this->config->get('config_email') . '>' . "\r\n");                
     }
 }
