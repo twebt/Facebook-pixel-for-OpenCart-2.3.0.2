@@ -19,7 +19,9 @@ The module is tested only on:
 
 * OpenCart 2.3.0.2
 
-But it may work on other 2.x versions
+I'm not sure but it may works also on 2.3.x versions.
+
+For lower versions of OpenCart you can find the module ![here](https://github.com/twebt/facebook-pixel-opencart-2.0.3.1)
 
 ## Install:
 Copy both folders **admin** and **vqmod** to your OpenCart installation. Make sure to keep the OpenCart folders structure intact.
