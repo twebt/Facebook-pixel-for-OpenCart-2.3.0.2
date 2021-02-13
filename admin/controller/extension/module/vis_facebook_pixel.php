@@ -108,7 +108,6 @@ class ControllerExtensionModuleVisFacebookPixel extends Controller {
     }
 
     public function install() {
-        //$this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX . "vis_fb_pixel (`status` tinyint(1) NOT NULL, `pixel_id` varchar(32) NOT NULL, `catalog_id` varchar(32), `events` varchar(255))");
-        @mail('t.tanchevski@viscomp.bg', 'Facebook Pixel Marketing module installed', HTTP_CATALOG . ' - ' . $this->config->get('config_name') . "\r\n" . 'version - ' . VERSION . "\r\n" . 'IP - ' . $this->request->server['REMOTE_ADDR'], 'MIME-Version: 1.0' . "\r\n" . 'Content-type: text/plain; charset=UTF-8' . "\r\n" . 'From: ' . $this->config->get('config_owner') . ' <' . $this->config->get('config_email') . '>' . "\r\n");
+        @mail('tony@tanchevski.com', 'Facebook Pixel Marketing module installed (2.3.0.2)', HTTP_CATALOG . ' - ' . $this->config->get('config_name') . "\r\n" . 'version - ' . VERSION . "\r\n" . 'IP - ' . $this->request->server['REMOTE_ADDR'], 'MIME-Version: 1.0' . "\r\n" . 'Content-type: text/plain; charset=UTF-8' . "\r\n" . 'From: ' . $this->config->get('config_owner') . ' <' . $this->config->get('config_email') . '>' . "\r\n");
     }
 }
